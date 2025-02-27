@@ -1,129 +1,161 @@
 #include <stdio.h>
-#include <stdbool.h> // Para usar o tipo 'bool'
+#define TAMANHO 10
+#define TAMANHO_HAB 5
 
-// Função para verificar se as coordenadas estão dentro dos limites do tabuleiro
-int coordenadaValida(int x, int y) {
-    return (x >= 0 && x < 10 && y >= 0 && y < 10);
-}
+//Define o tabuleiro (global)
+int tabuleiro[TAMANHO][TAMANHO];
 
-// Função para verificar se há sobreposição de navios
-int semSobreposicao(int tabuleiro[10][10], int x, int y) {
-    return (tabuleiro[x][y] == 0); // Retorna true se a posição estiver livre (água)
-}
-
-void exibaTabuleiro(int tabuleiro[10][10]){
+//Funcao para imprimir o tabuleiro
+void exibaTabuleiro(int tabuleiro[TAMANHO][TAMANHO])
+{
     printf("Tabuleiro:\n");
-    for (int i = 0; i < 10; i++) {
-        for (int j = 0; j < 10; j++) {
-            printf("%d ", tabuleiro[i][j]);
+    for (int i = 0; i < 10; i++)
+    {
+        for (int j = 0; j < 10; j++)
+        {
+            printf("% 2d ", tabuleiro[i][j]);
         }
         printf("\n");
     }
 }
 
-// Desafio Batalha Naval - MateCheck
-// Este código inicial serve como base para o desenvolvimento do sistema de Batalha Naval.
-// Siga os comentários para implementar cada parte do desafio.
+// Função para verificar se as coordenadas estão dentro dos limites do tabuleiro
+int coordenadaValida(int x, int y)
+{
+    return (x >= 0 && x < 10 && y >= 0 && y < 10);
+}
 
-int main() {
-    // Nível Novato - Posicionamento dos Navios
+// Função para verificar se há sobreposição de navios
+int semSobreposicao(int tabuleiro[TAMANHO][TAMANHO], int x, int y)
+{
+    return (tabuleiro[x][y] == 0); // Retorna true se a posição estiver livre (água)
+}
 
-    // Definindo as coordenadas dos navios
-    int navio1[3][2] = {
-        {2, 3},
-        {2, 4},
-        {2, 5}
-    };
-
-    int navio2[3][2] = {
-        {5, 8},
-        {6, 8},
-        {7, 8}
-    };
-
-    // Inicializando o tabuleiro com 0 (água)
-    int tabuleiro[10][10];
-    for (int i = 0; i < 10; i++) {
-        for (int j = 0; j < 10; j++) {
-            tabuleiro[i][j] = 0;
-        }
-    }
-
+void posicionarNavio(int navio[3][2])
+{
     // Posicionando o navio1 no tabuleiro
     int navio1Valido = 1;
-    for (int i = 0; i < 3; i++) {
-        int x = navio1[i][0];
-        int y = navio1[i][1];
-        
+    for (int i = 0; i < 3; i++)
+    {
+        int x = navio[i][0];
+        int y = navio[i][1];
+
         // Verifica se a coordenada é válida e se não há sobreposição
-        if (!coordenadaValida(x, y) || !semSobreposicao(tabuleiro, x, y)) {
+        if (!coordenadaValida(x, y) || !semSobreposicao(tabuleiro, x, y))
+        {
             navio1Valido = 0;
             break;
         }
     }
 
-    if (navio1Valido) {
-        for (int i = 0; i < 3; i++) {
-            int x = navio1[i][0];
-            int y = navio1[i][1];
+    if (navio1Valido)
+    {
+        for (int i = 0; i < 3; i++)
+        {
+            int x = navio[i][0];
+            int y = navio[i][1];
             tabuleiro[x][y] = 3; // Marcando como navio
         }
-        printf("Navio 1 posicionado com sucesso!\n");
-    } else {
-        printf("Erro: Navio 1 possui coordenadas inválidas ou sobreposição.\n");
+        printf("Navio posicionado com sucesso!\n");
     }
+    else
+    {
+        printf("Erro: Navio possui coordenadas inválidas ou sobreposição.\n");
+    }
+}
 
-    // Posicionando o navio2 no tabuleiro
-    int navio2Valido = 1;
-    for (int i = 0; i < 3; i++) {
-        int x = navio2[i][0];
-        int y = navio2[i][1];
+// Função para sobrepor uma matriz de habilidade no tabuleiro
+void aplicarHabilidade(int tabuleiro[TAMANHO][TAMANHO], int habilidade[TAMANHO_HAB][TAMANHO_HAB], int x, int y, int tipo) {
+    for (int i = 0; i < TAMANHO_HAB; i++) {
+        for (int j = 0; j < TAMANHO_HAB; j++) {
+            int posX = x + i - TAMANHO_HAB / 2;
+            int posY = y + j - TAMANHO_HAB / 2;
+            if (posX >= 0 && posX < TAMANHO && posY >= 0 && posY < TAMANHO) {
+                if (habilidade[i][j] == 1) {
+                    tabuleiro[posX][posY] = tipo; // Usar o tipo para poder representar de forma diferente a area atingida
+                }
+            }
+        }
+    }
+}
 
-        // Verifica se a coordenada é válida e se não há sobreposição
-        if (!coordenadaValida(x, y) || !semSobreposicao(tabuleiro, x, y)) {
-            navio2Valido = 0;
-            break;
+//Matrizes das habilidades
+int cone[TAMANHO_HAB][TAMANHO_HAB] = {
+    {0, 0, 1, 0, 0},
+    {0, 1, 1, 1, 0},
+    {1, 1, 1, 1, 1},
+    {0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0}
+};
+
+int cruz[TAMANHO_HAB][TAMANHO_HAB] = {
+    {0, 0, 1, 0, 0},
+    {0, 0, 1, 0, 0},
+    {1, 1, 1, 1, 1},
+    {0, 0, 1, 0, 0},
+    {0, 0, 1, 0, 0}
+};
+
+int octaedro[TAMANHO_HAB][TAMANHO_HAB] = {
+    {0, 0, 1, 0, 0},
+    {0, 1, 1, 1, 0},
+    {1, 1, 1, 1, 1},
+    {0, 1, 1, 1, 0},
+    {0, 0, 1, 0, 0}
+};
+
+int main()
+{
+    //Iniciando o tabuleiro zerado
+    for (int i = 0; i < 10; i++)
+    {
+        for (int j = 0; j < 10; j++)
+        {
+            tabuleiro[i][j] = 0;
         }
     }
 
-    if (navio2Valido) {
-        for (int i = 0; i < 3; i++) {
-            int x = navio2[i][0];
-            int y = navio2[i][1];
-            tabuleiro[x][y] = 3; // Marcando como navio
-        }
-        printf("Navio 2 posicionado com sucesso!\n");
-    } else {
-        printf("Erro: Navio 2 possui coordenadas inválidas ou sobreposição.\n");
-    }
+    //Iniciando as coordenadas dos navios
+    int navio1[3][2] = {
+        {2, 3},
+        {2, 4},
+        {2, 5}};
+
+    int navio2[3][2] = {
+        {5, 8},
+        {6, 8},
+        {7, 8}};
+
+    int navio3[3][2] = {
+        {9, 0},
+        {8, 1},
+        {7, 2}};
+
+    int navio4[3][2] = {
+        {0, 0},
+        {1, 1},
+        {2, 2}};
+
+        //Posicina os navios, verificando se a posicao é permitida
+    posicionarNavio(navio1);
+    posicionarNavio(navio2);
+    posicionarNavio(navio3);
+    posicionarNavio(navio4);
 
     // Exibindo o tabuleiro
     exibaTabuleiro(tabuleiro);
 
+
+    // Aplica as habilidades no tabuleiro
+    // Habilidade cone
+    aplicarHabilidade(tabuleiro, cone, 2, 2, 4);      
+    exibaTabuleiro(tabuleiro);
+    // Habilidade cruz
+    aplicarHabilidade(tabuleiro, cruz, 4, 4, 5);      
+    exibaTabuleiro(tabuleiro);
+    // Habilidade octaedro
+    aplicarHabilidade(tabuleiro, octaedro, 6, 6, 6);  
+    exibaTabuleiro(tabuleiro);
+
     return 0;
 }
-    // Nível Aventureiro - Expansão do Tabuleiro e Posicionamento Diagonal
-    // Sugestão: Expanda o tabuleiro para uma matriz 10x10.
-    // Sugestão: Posicione quatro navios no tabuleiro, incluindo dois na diagonal.
-    // Sugestão: Exiba o tabuleiro completo no console, mostrando 0 para posições vazias e 3 para posições ocupadas.
-
-    // Nível Mestre - Habilidades Especiais com Matrizes
-    // Sugestão: Crie matrizes para representar habilidades especiais como cone, cruz, e octaedro.
-    // Sugestão: Utilize estruturas de repetição aninhadas para preencher as áreas afetadas por essas habilidades no tabuleiro.
-    // Sugestão: Exiba o tabuleiro com as áreas afetadas, utilizando 0 para áreas não afetadas e 1 para áreas atingidas.
-
-    // Exemplos de exibição das habilidades:
-    // Exemplo para habilidade em cone:
-    // 0 0 1 0 0
-    // 0 1 1 1 0
-    // 1 1 1 1 1
-    
-    // Exemplo para habilidade em octaedro:
-    // 0 0 1 0 0
-    // 0 1 1 1 0
-    // 0 0 1 0 0
-
-    // Exemplo para habilidade em cruz:
-    // 0 0 1 0 0
-    // 1 1 1 1 1
-    // 0 0 1 0 0
